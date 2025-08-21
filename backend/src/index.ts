@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
+import invoiceRoutes from './routes/invoiceroutes';
 
 dotenv.config();
 connectDB();
@@ -9,7 +10,9 @@ connectDB();
 const app = express();
 
 app.use(express.json());
+
 app.use('/api/users', authRoutes);
+app.use('/api/invoices', invoiceRoutes);
 
 const PORT = process.env.PORT || 5001;
 
