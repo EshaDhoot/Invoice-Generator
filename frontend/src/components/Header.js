@@ -1,12 +1,14 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Avatar, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 const Header = ({ setAuth }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    localStorage.removeItem('authToken');
     localStorage.removeItem('isAuthenticated');
     setAuth(false);
     toast.info('You have been logged out.');
@@ -14,12 +16,34 @@ const Header = ({ setAuth }) => {
   };
 
   return (
-    <AppBar position="static" color="default" elevation={1}>
+    <AppBar 
+      position="static" 
+      sx={{ 
+        background: "linear-gradient(135deg, #5d9edeff, #091b2aff)", 
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)" 
+      }}
+    >
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-          InvoiceGenerator
-        </Typography>
-        <Button color="primary" variant="outlined" onClick={handleLogout}>
+        <Box display="flex" alignItems="center" sx={{ flexGrow: 1 }}>
+          <Avatar sx={{ bgcolor: "white", color: "primary.main", mr: 1 }}>
+            <DescriptionIcon />
+          </Avatar>
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            Invoice Generator
+          </Typography>
+        </Box>
+        <Button 
+          color="inherit" 
+          variant="contained" 
+          sx={{ 
+            bgcolor: "white", 
+            color: "primary.main", 
+            borderRadius: "20px", 
+            px: 3,
+            "&:hover": { bgcolor: "grey.100" }
+          }}
+          onClick={handleLogout}
+        >
           Logout
         </Button>
       </Toolbar>

@@ -1,12 +1,15 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { Container, Grid, Typography, Button, Box } from '@mui/material';
+import { Container, Grid, Typography, Button, Box, Avatar } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { LoginWrapper, LoginCard, Title } from './styles';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+
+import { LoginWrapper, LoginCard, StyledAvatar } from './styles';
 import TextFieldWrapper from '../../components/TextFieldWrapper';
 import { pageAnimation } from '../../animations';
+import api from '../../api';
 
 const Login = ({ setAuth }) => {
   const navigate = useNavigate();
@@ -21,68 +24,71 @@ const Login = ({ setAuth }) => {
     password: Yup.string().required('Required'),
   });
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    console.log(values);
-    // Mock login
-    setTimeout(() => {
-      if (values.email === 'test@test.com' && values.password === 'password') {
-        toast.success('Login successful!');
-        localStorage.setItem('isAuthenticated', 'true');
-        setAuth(true);
-        navigate('/invoice');
-      } else {
-        toast.error('Invalid email or password.');
-      }
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const response = await api.post('/users/login', values);
+      const { token } = response.data;
+      
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('isAuthenticated', 'true');
+      
+      setAuth(true);
+      toast.success('Login successful!');
+      navigate('/invoice');
+    } catch (error) {
+      // The axios interceptor will handle displaying the specific error from the backend
+      console.error('Login failed:', error);
+    } finally {
       setSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
     <LoginWrapper initial="hidden" animate="visible" exit="exit" variants={pageAnimation}>
-      <Container>
+      <Container component="main" maxWidth="xs">
         <LoginCard>
-          <Title>
-            <Typography variant="h4" gutterBottom>
-              Welcome Back
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Login to continue.
-            </Typography>
-          </Title>
-          <Formik
-            initialValues={INITIAL_FORM_STATE}
-            validationSchema={FORM_VALIDATION}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting }) => (
-              <Form>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
+          <StyledAvatar>
+            <LockOutlinedIcon />
+          </StyledAvatar>
+          <Typography component="h1" variant="h5">
+            Welcome Back
+          </Typography>
+          <Box sx={{ mt: 3, width: '100%' }}>
+            <Formik
+              initialValues={INITIAL_FORM_STATE}
+              validationSchema={FORM_VALIDATION}
+              onSubmit={handleSubmit}
+            >
+              {({ isSubmitting }) => (
+                <Form>
+                  {/* Use a Box with flexbox and gap for perfect, responsive field alignment */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextFieldWrapper name="email" label="Email" />
-                  </Grid>
-                  <Grid item xs={12}>
                     <TextFieldWrapper name="password" label="Password" type="password" />
+                  </Box>
+
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    disabled={isSubmitting}
+                    sx={{ mt: 3, mb: 2, padding: '12px' }}
+                  >
+                    {isSubmitting ? 'Logging in...' : 'Login'}
+                  </Button>
+
+                  <Grid container justifyContent="flex-end">
+                    <Grid item>
+                      <Link to="/signup" style={{ textDecoration: 'none' }}>
+                        <Typography variant="body2" color="primary">
+                          Don't have an account? Sign Up
+                        </Typography>
+                      </Link>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      fullWidth
-                      disabled={isSubmitting}
-                      sx={{ padding: '12px' }}
-                    >
-                      {isSubmitting ? 'Logging in...' : 'Login'}
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Form>
-            )}
-          </Formik>
-          <Box mt={3}>
-            <Typography variant="body2">
-              Don't have an account? <Link to="/signup">Sign Up</Link>
-            </Typography>
+                </Form>
+              )}
+            </Formik>
           </Box>
         </LoginCard>
       </Container>
