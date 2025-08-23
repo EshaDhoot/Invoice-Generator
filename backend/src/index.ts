@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 import invoiceRoutes from './routes/invoiceroutes';
+import cors from 'cors';
+
 
 dotenv.config();
 connectDB();
@@ -11,6 +13,7 @@ const app = express();
 
 app.use(express.json());
 
+app.use(cors());
 app.use('/api/users', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
 
